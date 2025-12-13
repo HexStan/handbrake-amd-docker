@@ -136,7 +136,7 @@ RUN apt-get install -y \
 # Install necessary dependencies
 RUN apt-get update && \
     apt-get install -y wget gnupg2 lsb-release software-properties-common && \
-    apt-get install -y dkms libpci-dev build-essential
+    apt-get install -y dkms libpci-dev build-essential rsync
 
 RUN apt-get update && apt-get install -y linux-firmware
 
