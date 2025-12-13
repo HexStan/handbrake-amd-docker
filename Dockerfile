@@ -141,11 +141,10 @@ RUN apt-get update && apt-get install -y linux-firmware
 
 WORKDIR /tmp
 
-# Download the AMD GPU-Pro driver (replace with the correct URL for your driver)
+# Download the AMD GPU-Pro driver
 RUN wget https://repo.radeon.com/amdgpu-install/30.20.1/ubuntu/jammy/amdgpu-install_7.1.1.70101-1_all.deb && \
     chmod 777 amdgpu-install_7.1.1.70101-1_all.deb && \
-    dpkg -i amdgpu-install_7.1.1.70101-1_all.deb && \
-    rm amdgpu-install_7.1.1.70101-1_all.deb
+    dpkg -i amdgpu-install_7.1.1.70101-1_all.deb
 
 # Install the AMD GPU-Pro driver with AMF/VCE support
 RUN amdgpu-install -y --accept-eula --vulkan=pro --opencl=rocr --usecase=dkms,graphics,opencl,hip,amf
