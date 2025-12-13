@@ -136,7 +136,7 @@ RUN apt-get install -y \
 # Install necessary dependencies
 RUN apt-get update && \
     apt-get install -y wget gnupg2 lsb-release software-properties-common && \
-    apt-get install -y dkms libpci-dev build-essential rsync
+    apt-get install -y dkms libpci-dev build-essential rsync jq
 
 RUN apt-get update && apt-get install -y linux-firmware
 
@@ -145,17 +145,16 @@ WORKDIR /tmp
 # COPY ./linux-firmware/amdgpu /lib/firmware/amdgpu
 
 # Download the AMD GPU-Pro driver
-RUN wget https://repo.radeon.com/amdgpu-install/7.0.3/ubuntu/jammy/amdgpu-install_7.0.3.70003-1_all.deb && \
-    chmod 777 amdgpu-install_7.0.3.70003-1_all.deb && \
-    dpkg -i amdgpu-install_7.0.3.70003-1_all.deb
+RUN wget https://repo.radeon.com/amdgpu-install/6.4.4/ubuntu/jammy/amdgpu-install_6.4.60404-1_all.deb && \
+    chmod 777 amdgpu-install_6.4.60404-1_all.deb && \
+    apt-get install -y ./amdgpu-install_6.4.60404-1_all.deb
 
-RUN mkdir -p /etc/apt/keyrings && \
-    wget -qO - https://repo.radeon.com/rocm/rocm.gpg.key | gpg --dearmor | tee /etc/apt/keyrings/rocm.gpg > /dev/null && \
-    wget -qO - https://repo.radeon.com/rocm/rocm.gpg.key | apt-key add -
+RUN mkdir --parents --mode=0755 /etc/apt/keyrings && \
+    wget https://repo.radeon.com/rocm/rocm.gpg.key -O - | gpg --dearmor | sudo tee /etc/apt/keyrings/rocm.gpg > /dev/null
 
 # Install the AMD GPU-Pro driver with AMF/VCE support
 RUN apt-get update && \
-    amdgpu-install -y --accept-eula --vulkan=radv --opencl=rocr --usecase=graphics,opencl,hip,amf --no-dkms
+    amdgpu-install -y --accept-eula --vulkan=radv --opencl=rocr --usecase=graphics,opencl,hip,amf --dkms
 
 # Set up environment variables (optional, depending on your needs)
 ENV LD_LIBRARY_PATH=/opt/amdgpu-pro/lib/x86_64-linux-gnu:/opt/amdgpu/lib/x86_64-linux-gnu:${LD_LIBRARY_PATH}
