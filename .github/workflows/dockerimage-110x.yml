@@ -1,6 +1,7 @@
-name: Dockerimage 1.10.x
+name: Docker image 1.10.x
 
-# on:
+on:
+  workflow_dispatch:
 #   push:
 #     branches:
 #       - master
