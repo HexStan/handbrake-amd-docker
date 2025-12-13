@@ -150,11 +150,12 @@ RUN wget https://repo.radeon.com/amdgpu-install/7.0.3/ubuntu/jammy/amdgpu-instal
     dpkg -i amdgpu-install_7.0.3.70003-1_all.deb
 
 RUN mkdir -p /etc/apt/keyrings && \
-    wget -q -O - https://repo.radeon.com/rocm/rocm.gpg.key | gpg --dearmor | tee /etc/apt/keyrings/rocm.gpg > /dev/null && \
-    wget -q -O - https://repo.radeon.com/rocm/rocm.gpg.key | apt-key add -
+    wget -qO - https://repo.radeon.com/rocm/rocm.gpg.key | gpg --dearmor | tee /etc/apt/keyrings/rocm.gpg > /dev/null && \
+    wget -qO - https://repo.radeon.com/rocm/rocm.gpg.key | apt-key add -
 
 # Install the AMD GPU-Pro driver with AMF/VCE support
-RUN amdgpu-install -y --accept-eula --vulkan=radv --opencl=rocr --usecase=graphics,opencl,hip,amf
+RUN apt-get update && \
+    amdgpu-install -y --accept-eula --vulkan=radv --opencl=rocr --usecase=graphics,opencl,hip,amf --no-dkms
 
 # Set up environment variables (optional, depending on your needs)
 ENV LD_LIBRARY_PATH=/opt/amdgpu-pro/lib/x86_64-linux-gnu:/opt/amdgpu/lib/x86_64-linux-gnu:${LD_LIBRARY_PATH}
