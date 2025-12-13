@@ -20,14 +20,18 @@ RUN apt-get install -y \
 
 ## Build dependencies
 RUN apt-get install -y \
-	autoconf automake build-essential cmake git libass-dev libbz2-dev libfontconfig-dev libfreetype-dev libfribidi-dev libharfbuzz-dev libjansson-dev liblzma-dev libmp3lame-dev libnuma-dev libogg-dev libopus-dev libsamplerate0-dev libspeex-dev libtheora-dev libtool libtool-bin libturbojpeg0-dev libvorbis-dev libx264-dev libxml2-dev libvpx-dev m4 make meson nasm ninja-build patch pkg-config tar zlib1g-dev
+	autoconf automake build-essential cmake git libass-dev libbz2-dev libfontconfig-dev libfreetype-dev libfribidi-dev \
+    libharfbuzz-dev libjansson-dev liblzma-dev libmp3lame-dev libnuma-dev libogg-dev libopus-dev libsamplerate0-dev \
+    libspeex-dev libtheora-dev libtool libtool-bin libturbojpeg0-dev libvorbis-dev libx264-dev libxml2-dev libvpx-dev \
+    m4 make meson nasm ninja-build patch pkg-config tar zlib1g-dev
 
 ## Intel CSV dependencies
 RUN apt-get install -y libva-dev libdrm-dev
 
 ## GTK GUI dependencies
-RUN apt-get install -y \ 
-    appstream desktop-file-utils gettext gstreamer1.0-libav gstreamer1.0-plugins-good libgstreamer-plugins-base1.0-dev libgtk-4-dev
+RUN apt-get install -y \
+    appstream desktop-file-utils gettext gstreamer1.0-libav gstreamer1.0-plugins-good libgstreamer-plugins-base1.0-dev \
+    libgtk-4-dev
 
 ## Install clang
 RUN apt-get install -y clang
@@ -51,8 +55,7 @@ RUN ./configure --prefix=/usr/local \
                 --enable-x265 \
                 --enable-numa \
                 --enable-qsv \
-                --enable-nvenc \
-                --enable-nvdec \
+                --enable-vce \
                 --launch-jobs=$(nproc) \
                 --launch
 
@@ -64,8 +67,6 @@ RUN make -j$(nproc) --directory=build install
 ## Pull base image
 FROM jlesage/baseimage-gui:ubuntu-22.04-v4
 
-ENV NVIDIA_VISIBLE_DEVICES=all
-ENV NVIDIA_DRIVER_CAPABILITIES=all
 ENV DEBIAN_FRONTEND=noninteractive
 
 ENV APP_NAME="HandBrake"
@@ -83,7 +84,7 @@ WORKDIR /tmp
 ## Runtime dependencies
 RUN apt-get update
 RUN apt-get install -y --no-install-recommends \
-    # For optical drive listing:
+    # For optical drive listing
     lsscsi \
     # For watchfolder
     bash \
@@ -127,6 +128,34 @@ RUN apt-get install -y \
     libx265-199 \
     libxml2 \
     libturbojpeg
+
+#######################################################################################
+# Add AMD GPU drivers
+
+# Install necessary dependencies
+RUN apt-get update && \
+    apt-get install -y wget gnupg2 lsb-release software-properties-common && \
+    apt-get install -y dkms libpci-dev build-essential
+
+RUN apt-get update && apt-get install -y linux-firmware
+
+WORKDIR /tmp
+
+# Download the AMD GPU-Pro driver (replace with the correct URL for your driver)
+RUN wget https://repo.radeon.com/amdgpu-install/30.20.1/ubuntu/jammy/amdgpu-install_7.1.1.70101-1_all.deb && \
+    chmod 777 amdgpu-install_7.1.1.70101-1_all.deb && \
+    dpkg -i amdgpu-install_7.1.1.70101-1_all.deb && \
+    rm amdgpu-install_7.1.1.70101-1_all.deb
+
+# Install the AMD GPU-Pro driver with AMF/VCE support
+RUN amdgpu-install -y --accept-eula --vulkan=pro --opencl=rocr --usecase=dkms,graphics,opencl,hip,amf
+
+# Set up environment variables (optional, depending on your needs)
+ENV LD_LIBRARY_PATH=/opt/amdgpu-pro/lib/x86_64-linux-gnu:/opt/amdgpu/lib/x86_64-linux-gnu:${LD_LIBRARY_PATH}
+ENV LIBVA_DRIVERS_PATH=/opt/amdgpu-pro/lib/x86_64-linux-gnu/dri:${LIBVA_DRIVERS_PATH}
+ENV LIBVA_DRIVER_NAME=radeonsi
+
+#######################################################################################
 
 ## To read encrypted DVDs install libdvdcss
 RUN wget $DVDCSS_URL
