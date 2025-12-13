@@ -145,12 +145,12 @@ WORKDIR /tmp
 # COPY ./linux-firmware/amdgpu /lib/firmware/amdgpu
 
 # Download the AMD GPU-Pro driver
-RUN wget https://repo.radeon.com/amdgpu-install/30.20.1/ubuntu/jammy/amdgpu-install_7.1.1.70101-1_all.deb && \
-    chmod 777 amdgpu-install_7.1.1.70101-1_all.deb && \
-    dpkg -i amdgpu-install_7.1.1.70101-1_all.deb
+RUN wget https://repo.radeon.com/amdgpu-install/7.0.3/ubuntu/jammy/amdgpu-install_7.0.3.70003-1_all.deb && \
+    chmod 777 amdgpu-install_7.0.3.70003-1_all.deb && \
+    dpkg -i amdgpu-install_7.0.3.70003-1_all.deb
 
 # Install the AMD GPU-Pro driver with AMF/VCE support
-RUN amdgpu-install -y --accept-eula --vulkan=pro --opencl=rocr --usecase=dkms,graphics,opencl,hip,amf
+RUN amdgpu-install -y --accept-eula --vulkan=pro --opencl=rocr --usecase=graphics,opencl,hip,amf
 
 # Set up environment variables (optional, depending on your needs)
 ENV LD_LIBRARY_PATH=/opt/amdgpu-pro/lib/x86_64-linux-gnu:/opt/amdgpu/lib/x86_64-linux-gnu:${LD_LIBRARY_PATH}
