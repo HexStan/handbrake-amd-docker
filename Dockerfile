@@ -1,6 +1,7 @@
 FROM ubuntu:22.04 AS builder
 
-LABEL Maintainer zocker-160
+LABEL Maintainer=zocker-160
+LABEL Fork-maintainer=hexstan
 
 ENV HANDBRAKE_VERSION_TAG=1.10.2
 ENV HANDBRAKE_DEBUG_MODE=none
@@ -141,7 +142,7 @@ RUN apt-get update && apt-get install -y linux-firmware
 
 WORKDIR /tmp
 
-COPY ./linux-firmware/amdgpu /lib/firmware/amdgpu
+# COPY ./linux-firmware/amdgpu /lib/firmware/amdgpu
 
 # Download the AMD GPU-Pro driver
 RUN wget https://repo.radeon.com/amdgpu-install/30.20.1/ubuntu/jammy/amdgpu-install_7.1.1.70101-1_all.deb && \
