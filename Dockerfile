@@ -154,7 +154,7 @@ RUN mkdir --parents --mode=0755 /etc/apt/keyrings && \
 
 # Install the AMD GPU-Pro driver with AMF/VCE support
 RUN apt-get update && \
-    amdgpu-install -y --accept-eula --vulkan=radv --opencl=rocr --usecase=graphics,opencl,hip,amf --dkms
+    amdgpu-install -y --accept-eula --vulkan=radv --opencl=rocr --usecase=dkms,graphics,opencl,hip,amf
 
 # Set up environment variables (optional, depending on your needs)
 ENV LD_LIBRARY_PATH=/opt/amdgpu-pro/lib/x86_64-linux-gnu:/opt/amdgpu/lib/x86_64-linux-gnu:${LD_LIBRARY_PATH}
