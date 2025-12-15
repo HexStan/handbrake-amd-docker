@@ -21,7 +21,7 @@ jobs:
     - name: Set up the Docker tags
       id: tags
       run: |
-       DATE_TAG=$(date +%y%m%d)
+       DATE_TAG=$(date +%F)
        echo "date_tag=$DATE_TAG" >> "$GITHUB_OUTPUT"
 
     - name: Set up Docker Buildx
@@ -43,7 +43,6 @@ jobs:
         platforms: linux/amd64
         tags: |
           hexstan/handbrake-amd:latest
-          hexstan/handbrake-amd:1.10
           hexstan/handbrake-amd:1.10-${{ steps.tags.outputs.date_tag }}
 
     # - name: Build the Docker image
