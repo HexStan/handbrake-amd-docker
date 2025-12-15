@@ -195,8 +195,7 @@ RUN \
 # Copy HandBrake from base build image
 COPY --from=builder /usr/local /usr
 
-RUN set-cont-env APP_NAME "HandBrake" && \
-    chmod -x /etc/cont-env.d/APP_NAME
+RUN set-cont-env APP_NAME "HandBrake"
 
 # Define mountable directories
 VOLUME ["/config"]
