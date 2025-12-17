@@ -177,7 +177,8 @@ RUN rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 # Copy HandBrake from base build image
 COPY --from=builder /usr/local /usr
 
-RUN usermod -a -G video,render app
+RUN groupadd -g 109 render 2>/dev/null || true && \
+    usermod -a -G video,render app
 
 RUN set-cont-env APP_NAME "HandBrake"
 
