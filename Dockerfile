@@ -11,7 +11,6 @@ ENV HANDBRAKE_URL_GIT=https://github.com/HandBrake/HandBrake.git
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-
 WORKDIR /HB
 
 ## Prepare
@@ -24,10 +23,11 @@ RUN apt-get install -y \
 	autoconf automake build-essential cmake git libass-dev libbz2-dev libfontconfig-dev libfreetype-dev libfribidi-dev \
     libharfbuzz-dev libjansson-dev liblzma-dev libmp3lame-dev libnuma-dev libogg-dev libopus-dev libsamplerate0-dev \
     libspeex-dev libtheora-dev libtool libtool-bin libturbojpeg0-dev libvorbis-dev libx264-dev libxml2-dev libvpx-dev \
-    m4 make meson nasm ninja-build patch pkg-config tar zlib1g-dev
+    m4 make meson nasm ninja-build patch pkg-config tar
 
-## Intel CSV dependencies
-RUN apt-get install -y libva-dev libdrm-dev
+## AMD Builder
+RUN apt-get install -y \
+    libva-dev libdrm-dev zlib1g-dev mesa-common-dev libglu1-mesa-dev
 
 ## GTK GUI dependencies
 RUN apt-get install -y \
@@ -74,6 +74,11 @@ ENV APP_NAME="HandBrake"
 ENV AUTOMATED_CONVERSION_PRESET="Very Fast 1080p30"
 ENV AUTOMATED_CONVERSION_FORMAT="mp4"
 
+# AMD GPU ENV
+ENV LIBVA_DRIVER_NAME=radeonsi
+ENV GST_VAAPI_ALL_DRIVERS=1
+ENV HSA_OVERRIDE_GFX_VERSION=10.3.0
+
 ## URLs
 ENV APP_ICON_URL=https://raw.githubusercontent.com/jlesage/docker-templates/master/jlesage/images/handbrake-icon.png
 
@@ -83,19 +88,40 @@ ENV DVDCSS_URL=http://ftp.br.debian.org/debian/pool/contrib/libd/libdvd-pkg/$DVD
 WORKDIR /tmp
 
 ## Runtime dependencies
-RUN apt-get update
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    lsscsi bash coreutils yad findutils expect tcl8.6 wget git curl gpg ca-certificates software-properties-common
+
+# AMD GPU Drivers
+
+# Add AMD Repo (ROCm & Pro)
+# Get newest OpenCL & AMF support
+RUN mkdir -p /etc/apt/keyrings && \
+    wget -q -O - https://repo.radeon.com/rocm/rocm.gpg.key | gpg --dearmor -o /etc/apt/keyrings/rocm.gpg && \
+    echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg] https://repo.radeon.com/amdgpu/6.0.2/ubuntu jammy main" \
+    > /etc/apt/sources.list.d/amdgpu.list && \
+    echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg] https://repo.radeon.com/rocm/apt/6.0.2 jammy main" \
+    > /etc/apt/sources.list.d/rocm.list && \
+    dpkg --add-architecture i386 && \
+    apt-get update
+
+# Install AMD Runtime
+# - mesa-va-drivers: Open-source VAAPI Driver
+# - mesa-vdpau-drivers: The old version of HW Acceleration API
+# - mesa-opencl-icd: Open-source OpenCL
+# - clinfo, vainfo: Debug tool
+# - rocm-opencl-runtime: AMD high performance OpenCL
+# - amf-amdgpu-pro: AMD AMF
+# - libdrm-amdgpu1: Kernel API
 RUN apt-get install -y --no-install-recommends \
-    # For optical drive listing
-    lsscsi \
-    # For watchfolder
-    bash \
-    coreutils \
-    yad \
-    findutils \
-    expect \
-    tcl8.6 \
-    wget \
-    git
+    mesa-va-drivers \
+    mesa-vdpau-drivers \
+    mesa-opencl-icd \
+    libdrm-amdgpu1 \
+    libdrm2 \
+    vainfo \
+    clinfo \
+    rocm-opencl-runtime \
+    amf-amdgpu-pro
 
 ## Handbrake dependencies
 RUN apt-get install -y \
@@ -130,39 +156,6 @@ RUN apt-get install -y \
     libxml2 \
     libturbojpeg
 
-#######################################################################################
-# Add AMD GPU drivers
-
-# Install necessary dependencies
-RUN apt-get update && \
-    apt-get install -y wget gnupg2 lsb-release software-properties-common && \
-    apt-get install -y dkms libpci-dev build-essential rsync jq
-
-RUN apt-get update && apt-get install -y linux-firmware
-
-WORKDIR /tmp
-
-# COPY ./linux-firmware/amdgpu /lib/firmware/amdgpu
-
-# Download the AMD GPU-Pro driver
-RUN wget https://repo.radeon.com/amdgpu-install/6.4.4/ubuntu/jammy/amdgpu-install_6.4.60404-1_all.deb && \
-    chmod 777 amdgpu-install_6.4.60404-1_all.deb && \
-    apt-get install -y ./amdgpu-install_6.4.60404-1_all.deb
-
-RUN mkdir --parents --mode=0755 /etc/apt/keyrings && \
-    wget https://repo.radeon.com/rocm/rocm.gpg.key -O - | gpg --dearmor | sudo tee /etc/apt/keyrings/rocm.gpg > /dev/null
-
-# Install the AMD GPU-Pro driver with AMF/VCE support
-RUN apt-get update && \
-    amdgpu-install -y --accept-eula --vulkan=pro --opencl=rocr --usecase=dkms,graphics,opencl,hip,amf
-
-# Set up environment variables (optional, depending on your needs)
-ENV LD_LIBRARY_PATH=/opt/amdgpu-pro/lib/x86_64-linux-gnu:/opt/amdgpu/lib/x86_64-linux-gnu:${LD_LIBRARY_PATH}
-ENV LIBVA_DRIVERS_PATH=/opt/amdgpu-pro/lib/x86_64-linux-gnu/dri:${LIBVA_DRIVERS_PATH}
-ENV LIBVA_DRIVER_NAME=radeonsi
-
-#######################################################################################
-
 ## To read encrypted DVDs install libdvdcss
 RUN wget $DVDCSS_URL
 RUN apt-get install -y ./$DVDCSS_NAME
@@ -174,26 +167,17 @@ RUN git clone https://github.com/jlesage/docker-handbrake.git --branch v25.10.1
 RUN cp -r docker-handbrake/rootfs/* /
 
 ## Cleanup
-RUN rm -rf docker-handbrake
-RUN apt-get remove wget git -y && \
-    apt-get autoremove -y && \
-    apt-get autoclean -y && \
-    apt-get clean -y && \
-    apt-get purge -y && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+RUN rm -rf docker-handbrake /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 ## Generate and install favicons
 RUN apt-get update
 RUN install_app_icon.sh "$APP_ICON_URL"
-RUN \
-    apt-get autoremove -y && \
-    apt-get autoclean -y && \
-    apt-get clean -y && \
-    apt-get purge -y && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+RUN rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Copy HandBrake from base build image
 COPY --from=builder /usr/local /usr
+
+RUN usermod -a -G video,render app
 
 RUN set-cont-env APP_NAME "HandBrake"
 
