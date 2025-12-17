@@ -42,9 +42,9 @@ jobs:
         pull: true
         platforms: linux/amd64
         tags: |
-          hexstan/handbrake-amd:latest
-          hexstan/handbrake-amd:1.10
-          hexstan/handbrake-amd:1.10-${{ steps.tags.outputs.date_tag }}
+          hexstan/handbrake-amd:dev
+          hexstan/handbrake-amd:1.10-dev
+          hexstan/handbrake-amd:1.10-${{ steps.tags.outputs.date_tag }}-dev
 
     # - name: Build the Docker image
     #   env:
