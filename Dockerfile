@@ -97,7 +97,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Get newest OpenCL & AMF support
 RUN mkdir -p /etc/apt/keyrings && \
     wget -q -O - https://repo.radeon.com/rocm/rocm.gpg.key | gpg --dearmor -o /etc/apt/keyrings/rocm.gpg && \
-    echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg] https://repo.radeon.com/amdgpu/6.0.2/ubuntu jammy main" \
+    echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg] https://repo.radeon.com/amdgpu/6.0.2/ubuntu jammy main proprietary" \
     > /etc/apt/sources.list.d/amdgpu.list && \
     echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg] https://repo.radeon.com/rocm/apt/6.0.2 jammy main" \
     > /etc/apt/sources.list.d/rocm.list && \
