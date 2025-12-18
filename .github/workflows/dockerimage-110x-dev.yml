@@ -16,7 +16,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
-        ref: 'dev'
+        ref: 'dev-2'
 
     - name: Set up the Docker tags
       id: tags
