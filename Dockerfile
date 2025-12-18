@@ -40,6 +40,12 @@ RUN apt-get install -y clang
 ## Install meson from pip
 RUN pip3 install -U meson
 
+# Install AMD AMF Headers
+RUN git clone https://github.com/GPUOpen-LibrariesAndSDKs/AMF.git /tmp/AMF && \
+    mkdir -p /usr/include/AMF && \
+    cp -r /tmp/AMF/amf/public/include/* /usr/include/AMF/ && \
+    rm -rf /tmp/AMF
+
 ## Download HandBrake sources
 RUN echo "Downloading HandBrake sources..."
 RUN git clone $HANDBRAKE_URL_GIT --branch $HANDBRAKE_VERSION_TAG
