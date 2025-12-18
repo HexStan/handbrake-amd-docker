@@ -26,7 +26,7 @@ RUN apt-get install -y \
     libspeex-dev libtheora-dev libtool libtool-bin libturbojpeg0-dev libvorbis-dev libx264-dev libxml2-dev libvpx-dev \
     m4 make meson nasm ninja-build patch pkg-config tar zlib1g-dev
 
-## Intel CSV dependencies
+## Intel CSV and AMD dependencies
 RUN apt-get install -y libva-dev libdrm-dev
 
 ## GTK GUI dependencies
@@ -97,6 +97,15 @@ RUN apt-get install -y --no-install-recommends \
     wget \
     git
 
+### AMD GPU Support (Runtime) ###
+RUN apt-get install -y --no-install-recommends \
+    mesa-va-drivers \
+    libdrm-amdgpu1 \
+    libvulkan1 \
+    mesa-vulkan-drivers \
+    vainfo \
+    clinfo
+
 ## Handbrake dependencies
 RUN apt-get install -y \
     gstreamer1.0-libav \
@@ -129,39 +138,6 @@ RUN apt-get install -y \
     libx265-199 \
     libxml2 \
     libturbojpeg
-
-#######################################################################################
-# Add AMD GPU drivers
-
-# Install necessary dependencies
-RUN apt-get update && \
-    apt-get install -y wget gnupg2 lsb-release software-properties-common && \
-    apt-get install -y dkms libpci-dev build-essential rsync jq
-
-RUN apt-get update && apt-get install -y linux-firmware
-
-WORKDIR /tmp
-
-# COPY ./linux-firmware/amdgpu /lib/firmware/amdgpu
-
-# Download the AMD GPU-Pro driver
-RUN wget https://repo.radeon.com/amdgpu-install/6.4.4/ubuntu/jammy/amdgpu-install_6.4.60404-1_all.deb && \
-    chmod 777 amdgpu-install_6.4.60404-1_all.deb && \
-    apt-get install -y ./amdgpu-install_6.4.60404-1_all.deb
-
-RUN mkdir --parents --mode=0755 /etc/apt/keyrings && \
-    wget https://repo.radeon.com/rocm/rocm.gpg.key -O - | gpg --dearmor | sudo tee /etc/apt/keyrings/rocm.gpg > /dev/null
-
-# Install the AMD GPU-Pro driver with AMF/VCE support
-RUN apt-get update && \
-    amdgpu-install -y --accept-eula --vulkan=pro --opencl=rocr --usecase=dkms,graphics,opencl,hip,amf
-
-# Set up environment variables (optional, depending on your needs)
-ENV LD_LIBRARY_PATH=/opt/amdgpu-pro/lib/x86_64-linux-gnu:/opt/amdgpu/lib/x86_64-linux-gnu:${LD_LIBRARY_PATH}
-ENV LIBVA_DRIVERS_PATH=/opt/amdgpu-pro/lib/x86_64-linux-gnu/dri:${LIBVA_DRIVERS_PATH}
-ENV LIBVA_DRIVER_NAME=radeonsi
-
-#######################################################################################
 
 ## To read encrypted DVDs install libdvdcss
 RUN wget $DVDCSS_URL
