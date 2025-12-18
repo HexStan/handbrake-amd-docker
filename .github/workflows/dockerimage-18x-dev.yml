@@ -1,4 +1,4 @@
-name: Docker image 1.10.x developer version
+name: Docker image 1.8.x developer version
 
 on:
   workflow_dispatch:
@@ -6,7 +6,7 @@ on:
 #     branches:
 #       - dev
 #     paths:
-#       - "**-110x-dev.yml"
+#       - "**-18x-dev.yml"
 #       - "Dockerfile"
 
 jobs:
