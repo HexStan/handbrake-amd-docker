@@ -40,12 +40,6 @@ RUN apt-get install -y clang
 ## Install meson from pip
 RUN pip3 install -U meson
 
-# Install AMD AMF Headers
-RUN git clone https://github.com/GPUOpen-LibrariesAndSDKs/AMF.git /tmp/AMF && \
-    mkdir -p /usr/include/AMF && \
-    cp -r /tmp/AMF/amf/public/include/* /usr/include/AMF/ && \
-    rm -rf /tmp/AMF
-
 ## Download HandBrake sources
 RUN echo "Downloading HandBrake sources..."
 RUN git clone $HANDBRAKE_URL_GIT --branch $HANDBRAKE_VERSION_TAG
@@ -104,18 +98,21 @@ RUN apt-get install -y --no-install-recommends \
     git
 
 ### AMD GPU Support (Runtime) ###
-RUN apt-get install -y --no-install-recommends \
-    libva2 \
-    libva-drm2 \
-    libva-x11-2 \
-    mesa-va-drivers \
-    libdrm-amdgpu1 \
-    libvulkan1 \
-    mesa-vulkan-drivers \
-    mesa-opencl-icd \
-    vulkan-tools \
-    vainfo \
-    clinfo
+RUN apt-get install -y \
+    mesa-va-drivers libdrm-amdgpu1 libvulkan1 mesa-vulkan-drivers vainfo \
+    gstreamer1.0-libav \
+    gstreamer1.0-plugins-base \
+    gstreamer1.0-plugins-good \
+    gstreamer1.0-plugins-bad \
+    gstreamer1.0-plugins-dugly \
+    gstreamer1.0-vaapi \
+    libass9 libavcodec-extra libavfilter-extra libavformat-extra libavutil56 \
+    libbluray2 libc6 libcairo2 libdvdnav4 libdvdread8 \
+    libgdk-pixbuf2.0-0 libglib2.0-0 libgtk-4-1 libgudev-1.0-0 \
+    libjansson4 libpango-1.0-0 libsamplerate0 libswresample3 \
+    libswscale5 libtheora0 libvorbis0a libvorbisenc2 \
+    libx264-163 libx265-199 libxml2 libturbojpeg \
+    libva2 libdrm2
 
 ## Handbrake dependencies
 RUN apt-get install -y \
@@ -149,6 +146,9 @@ RUN apt-get install -y \
     libx265-199 \
     libxml2 \
     libturbojpeg
+
+ENV LIBVA_DRIVER_NAME=radeonsi
+ENV LIBVA_DRIVERS_PATH=/usr/lib/x86_64-linux-gnu/dri
 
 ## To read encrypted DVDs install libdvdcss
 RUN wget $DVDCSS_URL
