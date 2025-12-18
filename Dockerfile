@@ -117,7 +117,7 @@ RUN apt-get install -y \
     gstreamer1.0-plugins-base \
     gstreamer1.0-plugins-good \
     gstreamer1.0-plugins-bad \
-    gstreamer1.0-plugins-dugly \
+    gstreamer1.0-plugins-ugly \
     gstreamer1.0-vaapi \
     libass9 libavcodec-extra libavfilter-extra libavformat-extra libavutil56 \
     libbluray2 libc6 libcairo2 libdvdnav4 libdvdread8 \
