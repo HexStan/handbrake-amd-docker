@@ -142,8 +142,6 @@ RUN apt-get update && apt-get install -y linux-firmware
 
 WORKDIR /tmp
 
-COPY ./linux-firmware/amdgpu /lib/firmware/amdgpu
-
 # Download the AMD GPU-Pro driver
 RUN wget https://repo.radeon.com/amdgpu-install/6.1.3/ubuntu/jammy/amdgpu-install_6.1.60103-1_all.deb && \
     chmod 777 amdgpu-install_6.1.60103-1_all.deb && \
