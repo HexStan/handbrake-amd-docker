@@ -109,11 +109,10 @@ RUN apt-get install -y --no-install-recommends \
     mesa-vulkan-drivers \
     libvulkan1 \
     vulkan-tools \
-    libclc-amdgcn \
-    libclc-dev \
+    mesa-opencl-icd \
+    opencl-headers \
     mesa-va-drivers \
     mesa-vdpau-drivers \
-    mesa-opencl-icd \
     libdrm-amdgpu1 \
     libdrm2 \
     vainfo \
