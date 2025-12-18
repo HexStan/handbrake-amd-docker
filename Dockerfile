@@ -74,8 +74,6 @@ ENV APP_NAME="HandBrake"
 ENV AUTOMATED_CONVERSION_PRESET="Very Fast 1080p30"
 ENV AUTOMATED_CONVERSION_FORMAT="mp4"
 
-ENV LD_LIBRARY_PATH=/app/extensions/lib:/opt/amdgpu-pro/lib/x86_64-linux-gnu:/opt/amdgpu/lib/x86_64-linux-gnu:${LD_LIBRARY_PATH}
-
 ## URLs
 ENV APP_ICON_URL=https://raw.githubusercontent.com/jlesage/docker-templates/master/jlesage/images/handbrake-icon.png
 
@@ -164,7 +162,13 @@ RUN \
 # Copy HandBrake from base build image
 COPY --from=builder /usr/local /usr
 
+RUN getent group render || groupadd -r render
+RUN getent group video || groupadd -r video
+
 RUN set-cont-env APP_NAME "HandBrake"
+
+RUN sed -i '3i \
+export LD_LIBRARY_PATH=/opt/amdgpu-pro/lib/x86_64-linux-gnu:/opt/amdgpu/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH' /startapp.sh
 
 # Define mountable directories
 VOLUME ["/config"]
