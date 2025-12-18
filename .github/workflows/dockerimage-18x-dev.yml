@@ -1,0 +1,60 @@
+name: Docker image 1.10.x developer version
+
+on:
+  workflow_dispatch:
+#   push:
+#     branches:
+#       - dev
+#     paths:
+#       - "**-110x-dev.yml"
+#       - "Dockerfile"
+
+jobs:
+  handbrake:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        ref: 'dev-3'
+
+    - name: Set up the Docker tags
+      id: tags
+      run: |
+       DATE_TAG=$(date +%y%m%d)
+       echo "date_tag=$DATE_TAG" >> "$GITHUB_OUTPUT"
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_NAME }}
+        password: ${{ secrets.DOCKER_TOKEN }}
+
+    - name: Build and push
+      uses: docker/build-push-action@v6
+      with:
+        context: .
+        file: Dockerfile
+        push: true
+        pull: true
+        platforms: linux/amd64
+        tags: |
+          hexstan/handbrake-amd:dev
+          hexstan/handbrake-amd:1.8-dev
+          hexstan/handbrake-amd:1.8-${{ steps.tags.outputs.date_tag }}-dev
+
+    # - name: Build the Docker image
+    #   env:
+    #     HUB_NAME: ${{ secrets.DOCKER_NAME }}
+    #     HUB_KEY: ${{ secrets.DOCKER_TOKEN }}
+    #   run: |
+    #     docker login -u $HUB_NAME -p $HUB_KEY
+    #     docker build . --pull --no-cache --file Dockerfile --tag hexstan/handbrake-amd:110x
+
+    #     docker tag hexstan/handbrake-amd:110x hexstan/handbrake-amd:latest
+
+    #     docker push hexstan/handbrake-amd:110x
+    #     docker push hexstan/handbrake-amd:latest
