@@ -57,7 +57,6 @@ RUN ./configure --prefix=/usr/local \
                 --enable-numa \
                 --enable-qsv \
                 --enable-vce \
-                --enable-vaapi \
                 --launch-jobs=$(nproc) \
                 --launch
 
