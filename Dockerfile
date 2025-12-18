@@ -27,7 +27,7 @@ RUN apt-get install -y \
     m4 make meson nasm ninja-build patch pkg-config tar zlib1g-dev
 
 ## Intel CSV and AMD dependencies
-RUN apt-get install -y libva-dev libdrm-dev
+RUN apt-get install -y libva-dev libdrm-dev libvulkan-dev glslang-tools spirv-headers
 
 ## GTK GUI dependencies
 RUN apt-get install -y \
@@ -57,6 +57,7 @@ RUN ./configure --prefix=/usr/local \
                 --enable-numa \
                 --enable-qsv \
                 --enable-vce \
+                --enable-vaapi \
                 --launch-jobs=$(nproc) \
                 --launch
 
@@ -99,10 +100,15 @@ RUN apt-get install -y --no-install-recommends \
 
 ### AMD GPU Support (Runtime) ###
 RUN apt-get install -y --no-install-recommends \
+    libva2 \
+    libva-drm2 \
+    libva-x11-2 \
     mesa-va-drivers \
     libdrm-amdgpu1 \
     libvulkan1 \
     mesa-vulkan-drivers \
+    mesa-opencl-icd \
+    vulkan-tools \
     vainfo \
     clinfo
 
@@ -170,6 +176,9 @@ RUN \
 
 # Copy HandBrake from base build image
 COPY --from=builder /usr/local /usr
+
+RUN getent group render || groupadd -r render
+RUN getent group video || groupadd -r video
 
 RUN set-cont-env APP_NAME "HandBrake"
 
