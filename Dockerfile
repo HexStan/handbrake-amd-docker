@@ -3,7 +3,7 @@ FROM ubuntu:22.04 AS builder
 LABEL Maintainer=zocker-160
 LABEL Fork-maintainer=hexstan
 
-ENV HANDBRAKE_VERSION_TAG=1.10.2
+ENV HANDBRAKE_VERSION_TAG=1.8.2
 ENV HANDBRAKE_DEBUG_MODE=none
 
 ENV HANDBRAKE_URL=https://api.github.com/repos/HandBrake/HandBrake/releases/tags/$HANDBRAKE_VERSION
