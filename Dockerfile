@@ -26,8 +26,8 @@ RUN apt-get install -y \
     libspeex-dev libtheora-dev libtool libtool-bin libturbojpeg0-dev libvorbis-dev libx264-dev libxml2-dev libvpx-dev \
     m4 make meson nasm ninja-build patch pkg-config tar zlib1g-dev
 
-## Intel CSV and AMD dependencies
-RUN apt-get install -y libva-dev libdrm-dev libvulkan-dev glslang-tools spirv-headers
+## Intel QSV and AMD dependencies
+RUN apt-get install -y libva-dev libdrm-dev libvulkan-dev libudev-dev glslang-tools spirv-headers
 
 ## GTK GUI dependencies
 RUN apt-get install -y \
@@ -98,8 +98,21 @@ RUN apt-get install -y --no-install-recommends \
     git
 
 ### AMD GPU Support (Runtime) ###
+RUN apt-get install -y --no-install-recommends \
+    libva2 \
+    libva-drm2 \
+    libva-x11-2 \
+    mesa-va-drivers \
+    libdrm-amdgpu1 \
+    libvulkan1 \
+    mesa-vulkan-drivers \
+    mesa-opencl-icd \
+    vulkan-tools \
+    vainfo \
+    clinfo
+
+## Handbrake dependencies
 RUN apt-get install -y \
-    mesa-va-drivers libdrm-amdgpu1 libvulkan1 mesa-vulkan-drivers vainfo \
     gstreamer1.0-libav \
     gstreamer1.0-plugins-base \
     gstreamer1.0-plugins-good \
@@ -113,39 +126,6 @@ RUN apt-get install -y \
     libswscale5 libtheora0 libvorbis0a libvorbisenc2 \
     libx264-163 libx265-199 libxml2 libturbojpeg \
     libva2 libdrm2
-
-## Handbrake dependencies
-RUN apt-get install -y \
-    gstreamer1.0-libav \
-    gstreamer1.0-plugins-base \
-    gstreamer1.0-plugins-good \
-    gstreamer1.0-fdkaac \
-    libass9 \
-    libavcodec-extra58 \
-    libavfilter-extra7 \
-    libavformat58 \
-    libavutil56 \
-    libbluray2 \
-    libc6 \
-    libcairo2 \
-    libdvdnav4 \
-    libdvdread8 \
-    libgdk-pixbuf2.0-0 \
-    libglib2.0-0 \
-    libgtk-4-1 \
-    libgudev-1.0-0 \
-    libjansson4 \
-    libpango-1.0-0 \
-    libsamplerate0 \
-    libswresample3 \
-    libswscale5 \
-    libtheora0 \
-    libvorbis0a \
-    libvorbisenc2 \
-    libx264-163 \
-    libx265-199 \
-    libxml2 \
-    libturbojpeg
 
 ENV LIBVA_DRIVER_NAME=radeonsi
 ENV LIBVA_DRIVERS_PATH=/usr/lib/x86_64-linux-gnu/dri
