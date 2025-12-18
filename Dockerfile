@@ -105,14 +105,12 @@ RUN mkdir -p /etc/apt/keyrings && \
     apt-get update
 
 # Install AMD Runtime
-# - mesa-va-drivers: Open-source VAAPI Driver
-# - mesa-vdpau-drivers: The old version of HW Acceleration API
-# - mesa-opencl-icd: Open-source OpenCL
-# - clinfo, vainfo: Debug tool
-# - rocm-opencl-runtime: AMD high performance OpenCL
-# - amf-amdgpu-pro: AMD AMF
-# - libdrm-amdgpu1: Kernel API
 RUN apt-get install -y --no-install-recommends \
+    mesa-vulkan-drivers \
+    libvulkan1 \
+    vulkan-tools \
+    libclc-amdgcn \
+    libclc-dev \
     mesa-va-drivers \
     mesa-vdpau-drivers \
     mesa-opencl-icd \
