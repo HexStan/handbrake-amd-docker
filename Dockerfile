@@ -104,8 +104,9 @@ ARG AMDGPU_DRIVER_LINK=https://repo.radeon.com/amdgpu-install/6.4.4/ubuntu/jammy
 ARG AMDGPU_DRIVER_PACKAGE_NAME=amdgpu-install_6.4.60404-1_all.deb
 
 RUN wget -q ${AMDGPU_DRIVER_LINK} && \
-    apt-get install -y ./${AMDGPU_DRIVER_PACKAGE_NAME} && \
-    rm ${AMDGPU_DRIVER_PACKAGE_NAME}
+    apt-get install -y ./${AMDGPU_DRIVER_PACKAGE_NAME} \
+
+RUN rm ${AMDGPU_DRIVER_PACKAGE_NAME}
 
 RUN amdgpu-install -y --accept-eula --no-dkms --usecase=graphics,amf
 
