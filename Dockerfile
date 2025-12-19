@@ -100,12 +100,15 @@ RUN apt-get install -y --no-install-recommends \
 # =========================================================================
 # AMD GPU Support (VCN/AMF)
 # =========================================================================
+RUN apt-get update && apt-get install -y wget gnupg2 lsb-release software-properties-common && \
+    apt-get install -y libpci-dev build-essential rsync
+
 ARG AMDGPU_DRIVER_LINK=https://repo.radeon.com/amdgpu-install/6.4.4/ubuntu/jammy/amdgpu-install_6.4.60404-1_all.deb
 ARG AMDGPU_DRIVER_PACKAGE_NAME=amdgpu-install_6.4.60404-1_all.deb
 
 RUN wget -q ${AMDGPU_DRIVER_LINK} && \
     chmod 777 ${AMDGPU_DRIVER_PACKAGE_NAME} && \
-    apt-get install -y ./${AMDGPU_DRIVER_PACKAGE_NAME} && \
+    apt-get update && apt-get install -y ./${AMDGPU_DRIVER_PACKAGE_NAME} && \
     rm ${AMDGPU_DRIVER_PACKAGE_NAME}
 
 RUN amdgpu-install -y --accept-eula --no-dkms --usecase=graphics,amf
