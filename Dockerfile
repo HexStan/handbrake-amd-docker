@@ -97,6 +97,21 @@ RUN apt-get install -y --no-install-recommends \
     wget \
     git
 
+# =========================================================================
+# AMD GPU Support (VCN/AMF)
+# =========================================================================
+# 1. 下载并安装 amdgpu-install 包
+# 请检查 https://repo.radeon.com/amdgpu-install/ 寻找版本
+ARG AMDGPU_DRIVER_LINK=https://repo.radeon.com/amdgpu-install/6.4.4/ubuntu/jammy/amdgpu-install_6.4.60404-1_all.deb
+ARG AMDGPU_DRIVER_PACKAGE_NAME=amdgpu-install_6.4.60404-1_all.deb
+
+RUN wget -q ${AMDGPU_DRIVER_LINK} && \
+    apt-get install -y ./${AMDGPU_DRIVER_PACKAGE_NAME} && \
+    rm amdgpu-install_${AMDGPU_DRIVER_VERSION}_all.deb
+
+# 2. 安装 PRO 驱动 (Userspace only)
+RUN amdgpu-install -y --accept-eula --no-dkms --usecase=graphics,amf
+
 ## Handbrake dependencies
 RUN apt-get install -y \
     gstreamer1.0-libav \
@@ -168,7 +183,7 @@ RUN getent group video || groupadd -r video
 RUN set-cont-env APP_NAME "HandBrake"
 
 RUN sed -i '3i \
-export LD_LIBRARY_PATH=/opt/amdgpu-pro/lib/x86_64-linux-gnu:/opt/amdgpu/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH' /startapp.sh
+export LD_LIBRARY_PATH=/opt/amdgpu-pro/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH' /startapp.sh
 
 # Define mountable directories
 VOLUME ["/config"]
