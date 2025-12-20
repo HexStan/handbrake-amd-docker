@@ -45,16 +45,3 @@ jobs:
           hexstan/handbrake-amd:dev
           hexstan/handbrake-amd:1.10-dev
           hexstan/handbrake-amd:1.10-${{ steps.tags.outputs.date_tag }}-dev
-
-    # - name: Build the Docker image
-    #   env:
-    #     HUB_NAME: ${{ secrets.DOCKER_NAME }}
-    #     HUB_KEY: ${{ secrets.DOCKER_TOKEN }}
-    #   run: |
-    #     docker login -u $HUB_NAME -p $HUB_KEY
-    #     docker build . --pull --no-cache --file Dockerfile --tag hexstan/handbrake-amd:110x
-
-    #     docker tag hexstan/handbrake-amd:110x hexstan/handbrake-amd:latest
-
-    #     docker push hexstan/handbrake-amd:110x
-    #     docker push hexstan/handbrake-amd:latest
